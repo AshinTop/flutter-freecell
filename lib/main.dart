@@ -1,31 +1,18 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:freecell/functions/deck.dart';
-import 'package:freecell/functions/other.dart';
-import 'package:freecell/widgets/home.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'data.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-
-import 'theme.dart';
+import 'package:freecell/config/app.dart';
+import 'package:freecell/data.dart';
+import 'package:freecell/utils/game.dart';
+import 'package:freecell/widgets/home_page.dart';
+import 'package:freecell/widgets/theme/theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  prefs = await SharedPreferences.getInstance();
-  deckFromPref();
-  initPrefs();
-  if (!kIsWeb && await File(pf['back']).exists()) {
-    back = FileImage(File(pf['back']));
-  }
-  duration = Duration(milliseconds: pf['durationPref']);
-
+  await initApp();
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
@@ -35,10 +22,10 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'Freecell',
           theme: themeData(
-            tc: textColors[pf['theme']]!,
-            bc: backgroundColors[pf['theme']]!,
+            tc: appThemes[appConfigs['theme']]!.textColor,
+            bc: appThemes[appConfigs['theme']]!.bgColor,
           ),
-          home: const Home(),
+          home: const HomePage(),
         );
       },
     );

@@ -1,42 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:freecell/data.dart';
-import 'package:freecell/functions/deck.dart';
-import 'package:freecell/functions/other.dart';
-import 'package:freecell/services/end.dart';
-import 'package:freecell/services/floating_home.dart';
-import 'package:freecell/widgets/done.dart';
-import 'package:freecell/widgets/saved.dart';
+import 'package:freecell/utils/game.dart';
+import 'package:freecell/widgets/game/card_column.dart';
+import 'package:freecell/widgets/game/end.dart';
+import 'package:freecell/widgets/menu/floating_home.dart';
+import 'package:freecell/utils/prefs.dart';
+import 'package:freecell/widgets/game/done.dart';
+import 'package:freecell/widgets/game/saved.dart';
+import 'package:freecell/widgets/theme/theme_select.dart';
 import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
 
-import '../first_sheet.dart';
-import 'card_column.dart';
-
-class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
   @override
-  State<Home> createState() => _HomeState();
+  State<HomePage> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<HomePage> {
   DateTime timeBackPressed = DateTime.now();
 
   @override
   void initState() {
     ctx = context;
-    if (prefs.getStringList('col0') == null || prefs.getInt('count') == -1) {
+    if (!hasSavedGame()) {
       shuffleCards();
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (pf['firstBoot']) {
+      if (appConfigs['firstBoot']) {
         showModalBottomSheet(
           context: context,
-          builder: (context) => const SheetFirst(),
+          builder: (context) => const ThemeSelect(),
         );
       }
       try {
-        for (var i = 0; i < allDecks[count.value].length; i++) {
-          deck[i].value = allDecks[count.value][i].value.toList();
+        for (var i = 0; i < allMoves[moves.value].length; i++) {
+          currentCards[i].value = allMoves[moves.value][i].value.toList();
         }
         backup();
       } catch (e) {
@@ -56,16 +56,15 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    if (back != null) {
-      precacheImage(back!, context);
-    }
-    p = MediaQuery.of(context).orientation == Orientation.portrait;
-    w = MediaQuery.of(context).size.width;
-    h = MediaQuery.of(context).size.height;
+    final p = MediaQuery.of(context).orientation == Orientation.portrait;
+    final w = MediaQuery.of(context).size.width;
+    final h = MediaQuery.of(context).size.height;
+    Logger().d({p, w, h});
 
     return WillPopScope(
       onWillPop: () async {
-        final isExitWarning = DateTime.now().difference(timeBackPressed) > const Duration(seconds: 3);
+        final isExitWarning = DateTime.now().difference(timeBackPressed) >
+            const Duration(seconds: 3);
         timeBackPressed = DateTime.now();
         return !isExitWarning;
       },
@@ -85,40 +84,65 @@ class _HomeState extends State<Home> {
                         children: [
                           Container(
                             height: 60,
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 5),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 ValueListenableBuilder<int>(
-                                  valueListenable: count,
+                                  valueListenable: moves,
                                   builder: (context, data, widget) {
-                                    return Text(
-                                      '$data',
-                                      style: TextStyle(fontSize: 20, color: textColor()),
+                                    return Column(
+                                      children: [
+                                        Text('Moves',
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                color: getDarkTextColor())),
+                                        Text(
+                                          '$data',
+                                          style: TextStyle(
+                                              fontSize: 20,
+                                              color: getDarkTextColor()),
+                                        ),
+                                      ],
                                     );
                                   },
                                 ),
                                 ValueListenableBuilder<bool>(
                                   valueListenable: theme,
                                   builder: (context, value, child) {
-                                    if (pf['timer']) {
+                                    if (appConfigs['timer']) {
                                       return StreamBuilder(
                                         stream: Stream.periodic(
                                           const Duration(seconds: 1),
                                         ),
                                         builder: (context, snapshot) {
+                                          var time =
+                                              DateFormat('HH:mm:ss').format(
+                                            DateTime.now().subtract(
+                                              Duration(
+                                                  minutes: gameTimes.minute,
+                                                  seconds: gameTimes.second,
+                                                  hours: gameTimes.hour),
+                                            ),
+                                          );
                                           return Center(
-                                            child: Text(
-                                              DateFormat('mm:ss').format(
-                                                DateTime.now().subtract(
-                                                  Duration(
-                                                    minutes: dt.minute,
-                                                    seconds: dt.second,
-                                                  ),
+                                            child: Column(
+                                              children: [
+                                                Text('Time',
+                                                    style: TextStyle(
+                                                        fontSize: 14,
+                                                        color:
+                                                            getDarkTextColor())),
+                                                Text(
+                                                  time,
+                                                  style: TextStyle(
+                                                      fontSize: 20,
+                                                      color:
+                                                          getDarkTextColor()),
                                                 ),
-                                              ),
-                                              style: TextStyle(fontSize: 20, color: textColor()),
+                                              ],
                                             ),
                                           );
                                         },
@@ -146,7 +170,8 @@ class _HomeState extends State<Home> {
                       height: double.infinity,
                       child: Row(
                         children: [
-                          const RotatedBox(quarterTurns: 1, child: FloatingHome()),
+                          const RotatedBox(
+                              quarterTurns: 1, child: FloatingHome()),
                           Container(width: 20),
                         ],
                       ),
@@ -171,8 +196,10 @@ class _HomeState extends State<Home> {
                     child: AnimatedPadding(
                       curve: Curves.easeOutQuad,
                       duration: const Duration(milliseconds: 128),
-                      padding:
-                          EdgeInsets.only(top: toolbar && p ? 60 : 0, bottom: toolbar && p ? 60 : 0, left: !p ? 60 : 0),
+                      padding: EdgeInsets.only(
+                          top: toolbar && p ? 60 : 0,
+                          bottom: toolbar && p ? 60 : 0,
+                          left: !p ? 60 : 0),
                       child: Card(
                         shadowColor: Colors.transparent,
                         color: Theme.of(context).colorScheme.background,
@@ -182,60 +209,38 @@ class _HomeState extends State<Home> {
                         margin: EdgeInsets.zero,
                         child: Stack(
                           children: [
-                            back != null
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(19),
-                                    child: Image(
-                                      image: back!,
-                                      fit: BoxFit.cover,
-                                      height: double.infinity,
-                                      width: double.infinity,
-                                      alignment: Alignment.center,
-                                    ),
-                                  )
-                                : Container(),
                             p
-                                ? Column(
+                                ? ListView(
                                     children: [
                                       const SizedBox(
                                         height: 20,
                                       ),
-                                      !pf['reverse']
-                                          ? const Row(
-                                              children: [
-                                                Saved(index: 0),
-                                                Saved(index: 1),
-                                                Saved(index: 2),
-                                                Saved(index: 3),
-                                                Done(index: 0),
-                                                Done(index: 1),
-                                                Done(index: 2),
-                                                Done(index: 3),
-                                              ],
-                                            )
-                                          : Container(),
-                                      SizedBox(height: pf['reverse'] ? 0 : 12),
-                                      pf['reverse']
-                                          ? Expanded(
-                                              child: GestureDetector(
-                                                onTap: () {
-                                                  toolbar = !toolbar;
-                                                  setState(() {});
-                                                },
-                                              ),
-                                            )
-                                          : Container(),
+                                      const Row(
+                                        children: [
+                                          Saved(index: 0),
+                                          Saved(index: 1),
+                                          Saved(index: 2),
+                                          Saved(index: 3),
+                                          Done(index: 0),
+                                          Done(index: 1),
+                                          Done(index: 2),
+                                          Done(index: 3),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 12),
                                       Stack(
                                         children: [
                                           ValueListenableBuilder(
                                             valueListenable: endScreen,
                                             builder: (context, value, child) =>
-                                                isEmpty() ? const EndScreen() : Container(),
+                                                isGameEnd()
+                                                    ? const EndScreen()
+                                                    : Container(),
                                           ),
-                                          Row(
+                                          const Row(
                                             crossAxisAlignment:
-                                                pf['reverse'] ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                                            children: const [
+                                                CrossAxisAlignment.start,
+                                            children: [
                                               CardColumn(listIndex: 0),
                                               CardColumn(listIndex: 1),
                                               CardColumn(listIndex: 2),
@@ -248,40 +253,23 @@ class _HomeState extends State<Home> {
                                           ),
                                         ],
                                       ),
-                                      !pf['reverse']
-                                          ? Expanded(
-                                              child: GestureDetector(
-                                                onTap: () {
-                                                  toolbar = !toolbar;
-                                                  setState(() {});
-                                                },
-                                              ),
-                                            )
-                                          : Container(),
                                       SizedBox(
-                                        height: pf['reverse'] ? 12 : 0,
+                                        height: 50,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            toolbar = !toolbar;
+                                            setState(() {});
+                                          },
+                                        ),
                                       ),
-                                      pf['reverse']
-                                          ? const Row(
-                                              children: [
-                                                Saved(index: 0),
-                                                Saved(index: 1),
-                                                Saved(index: 2),
-                                                Saved(index: 3),
-                                                Done(index: 0),
-                                                Done(index: 1),
-                                                Done(index: 2),
-                                                Done(index: 3),
-                                              ],
-                                            )
-                                          : Container(),
-                                      SizedBox(height: pf['reverse'] ? 12 : 0),
                                     ],
                                   )
-                                : Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                : ListView(
+                                    scrollDirection: Axis.horizontal,
                                     children: [
+                                      const SizedBox(
+                                        width: 20,
+                                      ),
                                       const Column(
                                         children: [
                                           Row(
@@ -301,14 +289,17 @@ class _HomeState extends State<Home> {
                                           ])
                                         ],
                                       ),
-                                      isEmpty()
+                                      const SizedBox(
+                                        width: 40,
+                                      ),
+                                      isGameEnd()
                                           ? const EndScreen()
                                           : SizedBox(
                                               height: h,
-                                              child: Row(
+                                              child: const Row(
                                                 crossAxisAlignment:
-                                                    pf['reverse'] ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                                                children: const [
+                                                    CrossAxisAlignment.start,
+                                                children: [
                                                   CardColumn(listIndex: 0),
                                                   CardColumn(listIndex: 1),
                                                   CardColumn(listIndex: 2),

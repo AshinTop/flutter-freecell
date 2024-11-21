@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:freecell/functions/other.dart';
-
-import 'data.dart';
+import 'package:freecell/config/app.dart';
+import 'package:freecell/utils/game.dart';
 
 ThemeData themeData({
   required Color tc,
   required Color bc,
 }) {
   return ThemeData(
-    fontFamily: pf['font'],
+    fontFamily: appFont,
     textTheme: TextTheme(
-      bodyMedium: TextStyle(fontWeight: FontWeight.bold, color: tc, fontFamily: pf['font']),
-      bodyLarge: TextStyle(fontWeight: FontWeight.bold, color: tc, fontFamily: pf['font']),
+      bodyMedium: TextStyle(
+          fontWeight: FontWeight.bold, color: tc, fontFamily: appFont),
+      bodyLarge: TextStyle(
+          fontWeight: FontWeight.bold, color: tc, fontFamily: appFont),
     ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: bc,
@@ -24,19 +25,20 @@ ThemeData themeData({
       enabledBorder: UnderlineInputBorder(
         borderSide: BorderSide(color: tc, width: 2),
       ),
-      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: tc, width: 2)),
+      focusedBorder:
+          UnderlineInputBorder(borderSide: BorderSide(color: tc, width: 2)),
     ),
     dividerColor: tc,
     progressIndicatorTheme: ProgressIndicatorThemeData(color: tc),
     dialogBackgroundColor: bc,
     appBarTheme: AppBarTheme(
       backgroundColor: Colors.black,
-      foregroundColor: textColor(),
+      foregroundColor: getDarkTextColor(),
       shadowColor: Colors.transparent,
       titleTextStyle: TextStyle(
         fontWeight: FontWeight.bold,
-        color: textColor(),
-        fontFamily: pf['font'],
+        color: getDarkTextColor(),
+        fontFamily: appFont,
         fontSize: 20,
       ),
     ),

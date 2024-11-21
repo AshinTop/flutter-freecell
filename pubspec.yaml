@@ -1,53 +1,38 @@
 name: freecell
-description: A freecell solitaire game made in Flutter
+description: 'A classic FreeCell solitaire game built with Flutter'
 publish_to: 'none'
 version: 1.0.0+1
-
 environment:
-  sdk: '>=3.1.5 <4.0.0'
+  sdk: '>=3.3.4 <4.0.0'
 dependencies:
   flutter:
     sdk: flutter
-  shared_preferences: ^2.2.0
-
-  intl: ^0.18.1
-  soundpool: ^2.3.0
-  file_picker: ^5.3.2
+  cupertino_icons: ^1.0.6
+  shared_preferences: ^2.2.3
+  logger: ^2.5.0
+  soundpool: ^2.4.1
+  intl: ^0.20.0
+  file_picker: ^8.0.5
+  url_launcher: ^6.3.1
 
 dev_dependencies:
-  flutter_launcher_icons: ^0.13.1
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
+  flutter_lints: ^3.0.0
 flutter:
   uses-material-design: true
   fonts:
-    - family: RobotoMono
-      fonts:
-        - asset: fonts/RobotoMono-Regular.ttf
-
     - family: JetBrainsMono
       fonts:
-        - asset: fonts/JetBrainsMono-Regular.ttf
-
-    - family: IBMPlexMono
-      fonts:
-        - asset: fonts/IBMPlexMono-Regular.ttf
-
-    - family: Chess
-      fonts:
-        - asset: assets/icons/Chess.ttf
-
+        - asset: assets/fonts/JetBrainsMono-Regular.ttf
     - family: Suits
       fonts:
         - asset: assets/icons/Suits.ttf
-
   assets:
     - assets/flick.mp3
     - assets/winSounds/
-
 flutter_icons:
   android: true
-  image_path: "assets/icon.png"
-  adaptive_icon_background: "#ffffff"
-  adaptive_icon_foreground: "assets/icon.png"
+  image_path: 'assets/icon.png'
+  adaptive_icon_background: '#ffffff'
+  adaptive_icon_foreground: 'assets/icon.png'
