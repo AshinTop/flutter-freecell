@@ -14,8 +14,8 @@ List<String> winSoundList = [
   'assets/winSounds/006.mp3',
 ];
 
-late Soundpool soundPool;
-late int soundId;
+Soundpool? soundPool;
+int? soundId;
 Map<int, int> winSoundIds = {};
 
 Future<void> initSound() async {
@@ -23,12 +23,12 @@ Future<void> initSound() async {
     soundPool = Soundpool.fromOptions();
     //click sound
     ByteData soundData = await rootBundle.load('assets/flick.mp3');
-    soundId = await soundPool.load(soundData);
+    soundId = await soundPool?.load(soundData);
     //win sound
     for (var i = 0; i < winSoundList.length; i++) {
       rootBundle.load(winSoundList[i]).then((ByteData sData) async {
-        int sId = await soundPool.load(sData);
-        winSoundIds[i] = sId;
+        int? sId = await soundPool?.load(sData);
+        if (sId != null) winSoundIds[i] = sId;
       });
     }
   } catch (e) {
@@ -38,8 +38,8 @@ Future<void> initSound() async {
 
 playSound() {
   try {
-    if (appConfigs['soundPref']) {
-      soundPool.play(soundId);
+    if (appConfigs['soundPref'] && soundId != null) {
+      soundPool?.play(soundId!);
     }
   } catch (e) {
     logger.e('playSound error:', error: e);
@@ -52,7 +52,7 @@ Future playEndSound() async {
       Random random = Random();
       int winInt = random.nextInt(winSoundList.length);
       if (winSoundIds[winInt] != null) {
-        await soundPool.play(winSoundIds[winInt]!);
+        await soundPool?.play(winSoundIds[winInt]!);
       }
     }
   } catch (e) {

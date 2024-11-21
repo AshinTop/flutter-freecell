@@ -9,6 +9,7 @@ import 'package:freecell/model/card.dart';
 import 'package:freecell/utils/logger.dart';
 import 'package:freecell/utils/prefs.dart';
 import 'package:freecell/utils/sound.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 bool gameOver = false;
 
@@ -16,14 +17,14 @@ Future initApp() async {
   try {
     await initPrefs();
     startGameFromPref();
-    await initAppConfigs();
-    await initSound();
+    initAppConfigs();
+    initSound();
   } catch (e) {
     logger.e('initApp error:', error: e);
   }
 }
 
-startGameFromPref() {
+startGameFromPref() async {
   try {
     if (!hasSavedGame()) {
       return;
@@ -89,7 +90,7 @@ saveGameInfoToPref() {
   }
 }
 
-Future initAppConfigs() async {
+initAppConfigs() {
   try {
     for (var i = 0; i < appConfigs.length; i++) {
       String key = appConfigs.keys.elementAt(i);
@@ -346,5 +347,44 @@ Future autoSolve() async {
   } finally {
     duration = const Duration(milliseconds: animationDuration);
     shuffling.value = false;
+  }
+}
+
+void openSnackBar(BuildContext context, String text) {
+  final snackBar = SnackBar(
+    content: SelectableText(text),
+  );
+
+  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+Future<void> openEmailApp(BuildContext context) async {
+  final Uri params = Uri(
+    scheme: 'mailto',
+    path: supportEmail,
+  );
+  try {
+    if (await canLaunchUrl(params)) {
+      await launchUrl(params);
+    } else {
+      openSnackBar(context, 'Send email to $supportEmail');
+    }
+  } catch (e) {
+    openSnackBar(context, 'Send email to $supportEmail');
+  }
+}
+
+Future<void> openUrl(str) async {
+  try {
+    final Uri url = Uri.parse(str); // URL 链接
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      logger.e('Could not launch: $str');
+    }
+  } catch (e) {
+    logger.e('Could not launch: $str', error: e);
   }
 }

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:freecell/config/app.dart';
+import 'package:freecell/utils/game.dart';
 import 'package:freecell/utils/prefs.dart';
 import 'package:freecell/widgets/theme/theme_select.dart';
 import 'package:freecell/model/card.dart';
 import 'package:freecell/data.dart';
 import 'package:freecell/widgets/game/item_card.dart';
 import 'package:freecell/widgets/info_page.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class CustomPage extends StatefulWidget {
   const CustomPage({super.key});
@@ -45,34 +45,6 @@ class PageCustomState extends State<CustomPage> {
     Icons.numbers_rounded,
   ];
 
-  void openSnackBar(BuildContext context, String text) {
-    final snackBar = SnackBar(
-      behavior: SnackBarBehavior.floating,
-      width: MediaQuery.of(context).size.width - 20,
-      content: Text(text),
-      action: SnackBarAction(
-        label: 'Close',
-        onPressed: () {},
-      ),
-    );
-
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
-
-  Future<void> openEmailApp() async {
-    final Uri params = Uri(
-      scheme: 'mailto',
-      path: supportEmail,
-    );
-
-    if (await canLaunchUrl(params)) {
-      await launchUrl(params);
-    } else {
-      openSnackBar(context, 'Could not send email to $supportEmail');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final List<VoidCallback> tileFunctions = [
@@ -84,7 +56,7 @@ class PageCustomState extends State<CustomPage> {
           setState(() => setConfigsAndSavePrefs('timer', !appConfigs['timer'])),
     ];
     final List<VoidCallback> tileFunctions2 = [
-      () => {openEmailApp()},
+      () => {openEmailApp(context)},
       () => {},
     ];
     final List<Widget> tileTitle = [
@@ -293,8 +265,8 @@ class PageCustomState extends State<CustomPage> {
         padding: const EdgeInsets.all(16),
         child: FloatingActionButton(
           onPressed: () {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => InfoPage()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const InfoPage()));
           },
           tooltip: 'How to play',
           child: const Icon(Icons.book_outlined),

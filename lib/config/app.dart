@@ -13,6 +13,8 @@ const String gameName = 'FreeCell';
 
 const String supportEmail = '783767826@qq.com';
 
+const String gitStr = 'https://github.com/AshinTop/flutter-freecell';
+
 const String appFont = 'JetBrainsMono';
 
 const int animationDuration = 320;

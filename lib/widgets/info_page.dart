@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:freecell/config/app.dart';
+import 'package:freecell/utils/game.dart';
 
 class InfoPage extends StatelessWidget {
   const InfoPage({super.key});
@@ -123,13 +124,13 @@ class InfoPage extends StatelessWidget {
                               .colorScheme
                               .surfaceVariant
                               .withOpacity(.4),
-                          child: const Padding(
-                            padding: EdgeInsets.all(10),
+                          child: Padding(
+                            padding: const EdgeInsets.all(10),
                             child: Column(
                               children: [
-                                Text('Support'),
-                                SizedBox(height: 5),
-                                Text(
+                                const Text('Support'),
+                                const SizedBox(height: 5),
+                                const Text(
                                   'Have a question about us?\n'
                                   'We\'d love to hear from you! 🤗\n'
                                   'Send us a message and we\'ll get back to you as soon as possible:',
@@ -137,12 +138,31 @@ class InfoPage extends StatelessWidget {
                                   style:
                                       TextStyle(fontWeight: FontWeight.normal),
                                 ),
-                                SizedBox(height: 5),
-                                SelectableText(
-                                  supportEmail,
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(color: Colors.green),
+                                const SizedBox(height: 5),
+                                ListTile(
+                                  title: const Text(
+                                    'Email: $supportEmail',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        color: Colors.green, fontSize: 14),
+                                  ),
+                                  onTap: () {
+                                    openEmailApp(context);
+                                  },
+                                  leading: const Icon(Icons.email),
                                 ),
+                                const SizedBox(height: 10),
+                                InkWell(
+                                  enableFeedback: false,
+                                  child: const SelectableText(
+                                    'Github: $gitStr',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(fontSize: 10),
+                                  ),
+                                  onTap: () {
+                                    openUrl(gitStr);
+                                  },
+                                )
                               ],
                             ),
                           ))
