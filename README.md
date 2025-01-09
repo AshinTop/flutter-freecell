@@ -6,7 +6,7 @@ A classic **FreeCell** solitaire game built with Flutter.
 
 > Forked from [guhhsle/freecell](https://github.com/guhhsle/freecell)
 
-**🌐 Play Freecell Online!**: [https://freecell.ashin.top](https://freecell.ashin.top)
+**🌐 Play Freecell Online!**: [https://freecell.ashin.top](https://freecell-game.top/)
 
 ---
 
